@@ -22,6 +22,8 @@ import net.ssehub.comani.analysis.variabilitychange.diff.DiffAnalyzer;
 import net.ssehub.comani.core.Logger.MessageType;
 import net.ssehub.comani.data.Commit;
 import net.ssehub.comani.data.IAnalysisQueue;
+import net.ssehub.comani.utility.ProcessUtilities;
+import net.ssehub.comani.utility.ProcessUtilities.ExecutionResult;
 
 /**
  * This class represents the main class of this analyzer. In principle, this is a wrapper, which starts the actual
@@ -181,7 +183,10 @@ public class VariabilityChangeAnalyzer extends AbstractCommitAnalyzer {
         if (targetSpl == null) {
             logger.log(ID, "Visualization of analysis results disabled", null, MessageType.INFO);
         } else {
-            if (!targetSpl.equalsIgnoreCase("linux") && !targetSpl.equalsIgnoreCase("coreboot")) {
+            if (targetSpl.equalsIgnoreCase("linux") || targetSpl.equalsIgnoreCase("coreboot")) {
+                // Check if R and the required packages "Hmisc" and "nortest" are installed
+                checkRInstallation();
+            } else {
                 throw new AnalysisSetupException("Unsupported target SPL specified");
             }
         }
@@ -204,6 +209,41 @@ public class VariabilityChangeAnalyzer extends AbstractCommitAnalyzer {
         } else {
             throw new AnalysisSetupException("Creating new result directory \"" + resultsDirectory.getAbsolutePath() 
                     + "\" failed");
+        }
+    }
+    
+    /**
+     * Checks if R is installed on the current machine and if the required packages "Hmisc" and "nortest" are available.
+     */
+    private void checkRInstallation() throws AnalysisSetupException {
+        ProcessUtilities processUtilities = ProcessUtilities.getInstance();
+        ExecutionResult executionResult = processUtilities.executeCommand("Rscript --version", null);
+        // R is installed if the execution was successful and the error stream contains text starting with "R ..."
+        if (executionResult.executionSuccessful()) {
+            String errorStreamText = executionResult.getErrorOutputData();
+            if (errorStreamText != null && !errorStreamText.isEmpty() && errorStreamText.startsWith("R ")) {
+                // Check for installation of required R packages
+                executionResult = processUtilities.executeCommand("R -q -e \"installed.packages()[,1]\"", null);
+                if (executionResult.executionSuccessful()) {
+                    String standardOutputData = executionResult.getStandardOutputData();
+                    if (standardOutputData != null && !standardOutputData.isEmpty()) {                        
+                        if (!standardOutputData.contains("Hmisc") || !standardOutputData.contains("nortest")) {
+                            throw new AnalysisSetupException("Missing R packages\n"
+                                    + "Please install packages \"Hmisc\" and \"nortest\" as part of the R installation");
+                        }
+                    } else {
+                        throw new AnalysisSetupException("Executing command \"R -q -e \"installed.packages()[,1]\"\" returned no output\n"
+                                + "Cannot determine installed R packages");
+                    }
+                } else {
+                    throw new AnalysisSetupException("Executing command \"R -q -e \"installed.packages()[,1]\"\" failed\n"
+                            + "Cannot determine installed R packages");
+                }
+            } else {
+                throw new AnalysisSetupException("Missing R-environment for visualizing results");
+            }
+        } else {
+            throw new AnalysisSetupException("Missing R-environment for visualizing results");
         }
     }
     

@@ -107,7 +107,7 @@ public class ResultVisualizer {
     public boolean visualize(File resultFile, File outputDirectory, String splName) {
         logger.log(ID, "Starting visualizing", null, MessageType.DEBUG);
         boolean visualizationSuccessful = false;
-        if (prerequisitesSatisfied(resultFile, outputDirectory)) {
+        if (checkFile(resultFile, true) && checkFile(outputDirectory, false)) {
             File scriptsDirectory = getScriptsDirectory();
             if (scriptsDirectory != null) {
                 File mainVisualizationScript = new File(scriptsDirectory, MAIN_SCRIPT_NAME);
@@ -302,64 +302,6 @@ public class ResultVisualizer {
                 }
             }
         }
-    }
-    
-    /**
-     * Checks if the required input files, the R-environment, and the R-packages used by the R-scripts are available.
-     *  
-     * @param resultFile the result file as created by the {@link ResultCollector} containing the analysis results for
-     *        each commit 
-     * @param outputDirectory the directory to which this visualizer should save its results
-     * @return <code>true</code> if all prerequisites are satisfied; <code>false</code> otherwise
-     */
-    private boolean prerequisitesSatisfied(File resultFile, File outputDirectory) {
-        boolean prerequisitesSatisfied = false;
-        if (checkFile(resultFile, true) && checkFile(outputDirectory, false)) {
-            if (checkRInstallation()) {
-                // Check for installation of required R packages
-                ExecutionResult executionResult = processUtilities.executeCommand("R -q -e \"installed.packages()[,1]\"", null);
-                if (executionResult.executionSuccessful()) {
-                    String standardOutputData = executionResult.getStandardOutputData();
-                    if (standardOutputData != null && !standardOutputData.isEmpty()) {                        
-                        if (standardOutputData.contains("Hmisc") && standardOutputData.contains("nortest")) {
-                            prerequisitesSatisfied = true;
-                        } else {
-                            logger.log(ID, "Missing R packages",
-                                    "Please install packages \"Hmisc\" and \"nortest\" as part of the R installation",
-                                    MessageType.ERROR);
-                        }
-                    } else {
-                        logger.log(ID, "Executing command \"R -q -e \"installed.packages()[,1]\"\" returned no output",
-                                "Cannot determine installad R packages, hence no visualization possible", MessageType.ERROR);
-                    }
-                } else {
-                    logger.log(ID, "Executing command \"R -q -e \"installed.packages()[,1]\"\" failed",
-                            "Cannot determine installad R packages, hence no visualization possible", MessageType.ERROR);
-                }
-            } else {
-                logger.log(ID, "Missing R-environment for visualizing results", "Please install R on this machine", MessageType.ERROR);
-            }
-        }
-        return prerequisitesSatisfied;
-    }
-    
-    /**
-     * Checks if R is installed on the current machine.
-     * 
-     * @return <code>true</code> if the command "Rscript --version" terminates successful and the error stream of the process executing this
-     *         command contains text starting with "R ..."; <code>false</code> otherwise
-     */
-    private boolean checkRInstallation() {
-        boolean rInstalled = false;
-        ExecutionResult executionResult = processUtilities.executeCommand("Rscript --version", null);
-        // R is installed if the execution was successful and the error stream contains text starting with "R ..."
-        if (executionResult.executionSuccessful()) {
-            String errorStreamText = executionResult.getErrorOutputData();
-            if (errorStreamText != null && !errorStreamText.isEmpty() && errorStreamText.startsWith("R ")) {
-                rInstalled = true;
-            }
-        }
-        return rInstalled;
     }
     
     /**
