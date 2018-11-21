@@ -23,7 +23,7 @@ This plug-in is not a standalone tool, but only executable as the analyzer of a 
 
 *Plug-in-specific configuration parameter(s):*
 
-The name of the SPL from which the commits are analyzed. The definition of this property is optional and only necessary, if the visualization of analysis results is desired. In that case, valid values are [Cc]oreboot or [Ll]inux. All other values result in an AnalysisSetupException. Hence, this property indirectly controls the visualization.
+The name of the SPL from which the commits are analyzed. The definition of this property is optional and only necessary, if the visualization of analysis results is desired. In that case, valid values are "[Cc]oreboot" or "[Ll]inux". All other values result in an `AnalysisSetupException`. Hence, this property indirectly controls the visualization.
 ```Properties
 Type: optional
 Default value: none
@@ -32,8 +32,8 @@ analysis.variability_change_analyzer.target_spl = <[Cc]oreboot|[Ll]inux>
 ```
 
 ## References
-[1] Christian Kröher, Lea Gerling and Klaus Schmid. Identifying the Intensity of Variability Changes in Software Product Line Evolution. In Proceedings of the 22nd International Systems and Software Product Line Conference, Vol. 1, pp. 54-64, ACM, 2018.
+[1] Christian Kröher, Lea Gerling and Klaus Schmid. [Identifying the Intensity of Variability Changes in Software Product Line Evolution](https://sse.uni-hildesheim.de/forschung/publikationen/publikation-einzelansicht/?lsfid=11762&cHash=c331c5cf449cd662ce89c638ca2e5e69). In Proceedings of the 22nd International Systems and Software Product Line Conference, Vol. 1, pp. 54-64, ACM, 2018.
 
-[2] Christian Kröher and Klaus Schmid. A Commit-Bases Analysis of Software Product Line Evolution: Two Case Studies. Report No. 2/2017, SSE 2/17/E, 2017.
+[2] Christian Kröher and Klaus Schmid. [A Commit-Bases Analysis of Software Product Line Evolution: Two Case Studies](https://sse.uni-hildesheim.de/en/research/projects/revamp2/spl-evolution/). Report No. 2/2017, SSE 2/17/E, 2017.
 
-[3] Christian Kröher and Klaus Schmid. Towards a Better Understanding of Software Product Line Evolution. In Softwaretechnik-Trends, Vol. 37:2. Gesellschaft für Informatik e.V., Fachgruppe PARS, Berlin, Germany, pp. 40–41, 2017.
+[3] Christian Kröher and Klaus Schmid. [Towards a Better Understanding of Software Product Line Evolution](https://dl.gi.de/handle/20.500.12116/4685). In Softwaretechnik-Trends, Vol. 37:2. Gesellschaft für Informatik e.V., Fachgruppe PARS, Berlin, Germany, pp. 40–41, 2017.
