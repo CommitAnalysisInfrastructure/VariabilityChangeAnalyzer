@@ -22,6 +22,7 @@ This plug-in is not a standalone tool, but only executable as the analyzer of a 
 `analysis.analyzer = net.ssehub.comani.analysis.variabilitychange.core.VariabilityChangeAnalyzer`
 
 *Plug-in-specific configuration parameter(s):*
+
 The name of the SPL from which the commits are analyzed. The definition of this property is optional and only necessary, if the visualization of analysis results is desired. In that case, valid values are [Cc]oreboot or [Ll]inux. All other values result in an AnalysisSetupException. Hence, this property indirectly controls the visualization.
 ```Properties
 Type: optional
