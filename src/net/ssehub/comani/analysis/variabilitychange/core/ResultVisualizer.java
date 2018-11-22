@@ -89,6 +89,7 @@ public class ResultVisualizer {
      * Creates a new instance of this {@link ResultVisualizer}.
      */
     public ResultVisualizer() {
+        // TODO visualization fails on Ubuntu - why?
         deleteScriptsOnExit = false;
         logger = Logger.getInstance();
         processUtilities = ProcessUtilities.getInstance();
