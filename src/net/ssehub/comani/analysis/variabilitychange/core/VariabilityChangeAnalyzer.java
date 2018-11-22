@@ -223,22 +223,27 @@ public class VariabilityChangeAnalyzer extends AbstractCommitAnalyzer {
             String errorStreamText = executionResult.getErrorOutputData();
             if (errorStreamText != null && !errorStreamText.isEmpty() && errorStreamText.startsWith("R ")) {
                 // Check for installation of required R packages
-                executionResult = processUtilities.executeCommand("R -q -e \"installed.packages()[,1]\"", null);
-                if (executionResult.executionSuccessful()) {
-                    String standardOutputData = executionResult.getStandardOutputData();
-                    if (standardOutputData != null && !standardOutputData.isEmpty()) {                        
-                        if (!standardOutputData.contains("Hmisc") || !standardOutputData.contains("nortest")) {
-                            throw new AnalysisSetupException("Missing R packages\n"
-                                    + "Please install packages \"Hmisc\" and \"nortest\" as part of the R installation");
-                        }
-                    } else {
-                        throw new AnalysisSetupException("Executing command \"R -q -e \"installed.packages()[,1]\"\" returned no output\n"
-                                + "Cannot determine installed R packages");
-                    }
-                } else {
-                    throw new AnalysisSetupException("Executing command \"R -q -e \"installed.packages()[,1]\"\" failed\n"
-                            + "Cannot determine installed R packages");
-                }
+                /*
+                 * TODO This check does not work on Linux as the process executing the command does not include the
+                 * package list (neither on standard output nor on error output). As long as we do not have a solution
+                 * for this, excluded the check.
+                 */
+//                executionResult = processUtilities.executeCommand("R -q -e \"installed.packages()[,1]\"", null);
+//                if (executionResult.executionSuccessful()) {
+//                    String standardOutputData = executionResult.getStandardOutputData();
+//                    if (standardOutputData != null && !standardOutputData.isEmpty()) {                        
+//                        if (!standardOutputData.contains("Hmisc") || !standardOutputData.contains("nortest")) {
+//                            throw new AnalysisSetupException("Missing R packages\n"
+//                                    + "Please install packages \"Hmisc\" and \"nortest\" as part of the R installation");
+//                        }
+//                    } else {
+//                        throw new AnalysisSetupException("Executing command \"R -q -e \"installed.packages()[,1]\"\" returned no output\n"
+//                                + "Cannot determine installed R packages");
+//                    }
+//                } else {
+//                    throw new AnalysisSetupException("Executing command \"R -q -e \"installed.packages()[,1]\"\" failed\n"
+//                            + "Cannot determine installed R packages");
+//                }
             } else {
                 throw new AnalysisSetupException("Missing R-environment for visualizing results");
             }
