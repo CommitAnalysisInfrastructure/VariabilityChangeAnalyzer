@@ -89,7 +89,6 @@ public class ResultVisualizer {
      * Creates a new instance of this {@link ResultVisualizer}.
      */
     public ResultVisualizer() {
-        // TODO visualization fails on Ubuntu - why?
         deleteScriptsOnExit = false;
         logger = Logger.getInstance();
         processUtilities = ProcessUtilities.getInstance();
@@ -114,14 +113,22 @@ public class ResultVisualizer {
                 File mainVisualizationScript = new File(scriptsDirectory, MAIN_SCRIPT_NAME);
                 logger.log(ID, "Executing main script \"" + mainVisualizationScript.getAbsolutePath() + "\"", null,
                         MessageType.DEBUG);
-                ExecutionResult executionResult = processUtilities.executeCommand("Rscript \"" + mainVisualizationScript.getAbsolutePath() 
-                        + "\" \"" + resultFile.getAbsolutePath() 
-                        + "\" \"" + outputDirectory.getAbsolutePath() 
-                        + "\" " + splName, null);
+                String[] command = {
+                        "Rscript",
+                        mainVisualizationScript.getAbsolutePath(),
+                        resultFile.getAbsolutePath(),
+                        outputDirectory.getAbsolutePath(),
+                        splName
+                };
+                ExecutionResult executionResult = processUtilities.executeCommand(command, null);
                 if (executionResult.executionSuccessful()) {
                     visualizationSuccessful = true;
                 } else {
-                    logger.log(ID, "Visualizing results failed", executionResult.getErrorOutputData(), MessageType.ERROR);
+                    String executionErrorInformation = executionResult.getErrorOutputData();
+                    if (executionErrorInformation == null || executionErrorInformation.isEmpty()) {
+                        executionErrorInformation = executionResult.getStandardOutputData();
+                    }
+                    logger.log(ID, "Visualizing results failed", executionErrorInformation, MessageType.ERROR);
                 }
                 // If scripts directory is a temp one, delete it before exiting
                 if (deleteScriptsOnExit) {
@@ -232,6 +239,8 @@ public class ResultVisualizer {
                             // Unzip the current script to the temporary directory
                             tempScriptFile = new File(tempDirectory, scriptFileName);
                             extractScript(zipFile, scriptZipEntry, tempScriptFile);
+                            logger.log(ID, "Script \"" + scriptFileName + "\" extracted to \"" 
+                                    + tempScriptFile.getAbsolutePath() + "\"", null, MessageType.DEBUG);
                         } else {
                             scriptsAvailable = false;
                             logger.log(ID, "Missing visualization script",
