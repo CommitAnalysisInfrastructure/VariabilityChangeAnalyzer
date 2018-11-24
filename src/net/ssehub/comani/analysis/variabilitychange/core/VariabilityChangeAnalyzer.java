@@ -75,6 +75,14 @@ public class VariabilityChangeAnalyzer extends AbstractCommitAnalyzer {
     private static final String UNANALYZED_FILE_NAME = ID + "_Unanalyzed.txt";
     
     /**
+     * The command for printing the installed R version used to check whether SVN is installed during 
+     * {@link #prepare()}.<br>
+     * <br>
+     * Command: <code>Rscript --version</code>
+     */
+    private static final String[] R_VERSION_COMMAND = {"Rscript", "--version"};
+    
+    /**
      * The directory which will contain all result files produced by this analyzer.
      */
     private File resultsDirectory;
@@ -217,7 +225,7 @@ public class VariabilityChangeAnalyzer extends AbstractCommitAnalyzer {
      */
     private void checkRInstallation() throws AnalysisSetupException {
         ProcessUtilities processUtilities = ProcessUtilities.getInstance();
-        ExecutionResult executionResult = processUtilities.executeCommand("Rscript --version", null);
+        ExecutionResult executionResult = processUtilities.executeCommand(R_VERSION_COMMAND, null);
         // R is installed if the execution was successful and the error stream contains text starting with "R ..."
         if (executionResult.executionSuccessful()) {
             String errorStreamText = executionResult.getErrorOutputData();
