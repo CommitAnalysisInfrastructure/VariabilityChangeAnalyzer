@@ -291,7 +291,10 @@ public class ResultCollector {
     
     /**
      * Write the (final) summary of the analysis, e.g. the sum of changed files over all commits, the
-     * average numbers of changed lines per commit, etc.
+     * average numbers of changed lines per commit, etc.<br>
+     * <br>
+     * <b>Note:</b> This method will also reset the {@link #resultHeaderWritten} flag to <code>false</code> such that if
+     * this singleton is called again for a different analysis, the column headers of the result file will be written.
      * 
      * @param summaryFile the {@link File} to which the summary should be written; this file <b>must exist</b>
      * and <b>must be accessible</b>
@@ -345,5 +348,6 @@ public class ResultCollector {
             logger.log(ID, "Saving summary to \"" + summaryFile.getAbsolutePath() + "\" failed", e.getMessage(),
                     MessageType.ERROR);
         }
+        resultHeaderWritten = false; // Reset to guarantee that the next analysis results will have columns headers
     }
 }
