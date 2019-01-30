@@ -327,11 +327,11 @@ public class ResultCollector {
             summaryLineBuilder.append("CAv\t[C]ommits [Av]ailable: number of all commits input to this analysis\n");
             summaryLineBuilder.append("CAn\t[C]ommits [An]alyzed: number of commits actually analyzed\n");
             summaryLineBuilder.append("\t    Some commits may not be analyzed due to no file changes\n");
-            summaryLineBuilder.append("CCAI\t[C]ommits [C]hanging [A]rtifact-specific [I]nformation: number of commits that change at least one line of\n");
+            summaryLineBuilder.append("CCAI\t[C]ommits [C]hanging [A]rtifact-specific [I]nformation: number of commits that exclusively change at least one line of\n");
             summaryLineBuilder.append("\t    a) help text in a variability model file (no variability information)\n");
             summaryLineBuilder.append("\t    b) general source code in a source code file (no variability information)\n");
             summaryLineBuilder.append("\t    c) the general build process definition in a build file (no variability information)\n");
-            summaryLineBuilder.append("CCVI\t[C]ommits [C]hanging [V]ariability [I]nformation: number of commits that change at least one line defining\n");
+            summaryLineBuilder.append("CCVI\t[C]ommits [C]hanging [V]ariability [I]nformation: number of commits that exclusively change at least one line defining\n");
             summaryLineBuilder.append("\t    a) configuration options, etc. in a variability model file (variability information)\n");
             summaryLineBuilder.append("\t    b) references to configuration options in a source code file (variability information)\n");
             summaryLineBuilder.append("\t    c) references to configuration options in a build file (variability information)\n");
