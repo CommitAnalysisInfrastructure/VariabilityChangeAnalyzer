@@ -13,7 +13,7 @@
 /**
  * This package contains the core class for starting this analyzer.
  * 
- * @author Christian Kröher
+ * @author Christian Kroeher
  *
  */
 package net.ssehub.comani.analysis.variabilitychange.core;

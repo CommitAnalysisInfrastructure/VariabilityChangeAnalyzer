@@ -35,7 +35,7 @@ import net.ssehub.comani.utility.ProcessUtilities.ExecutionResult;
  * extracting the R-scripts to a temporary directory as well as deleting it after execution.
  *  
  * 
- * @author Christian Kröher
+ * @author Christian Kroeher
  *
  */
 public class ResultVisualizer {

@@ -29,7 +29,7 @@ import net.ssehub.comani.utility.ProcessUtilities.ExecutionResult;
  * This class represents the main class of this analyzer. In principle, this is a wrapper, which starts the actual
  * analysis by calling {@link DiffAnalyzer} for each received commit.
  * 
- * @author Christian Kröher
+ * @author Christian Kroeher
  *
  */
 public class VariabilityChangeAnalyzer extends AbstractCommitAnalyzer {
