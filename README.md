@@ -32,6 +32,31 @@ Default value: none
 Related parameters: none
 analysis.variability_change_analyzer.target_spl = <[Cc]oreboot|[Ll]inux>
 ```
+
+The regular expressions for identifying variability model, code, and build files. The definition of all three properties is mandatory and must follow the definition of [Java regular expressions](https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html). The absence of these definitions causes an `AnalysisSetupException`. An example is given below for each of the parameters.
+```Properties
+Type: mandatory
+Default value: none
+Related parameters: none
+analysis.variability_change_analyzer.vm_files_regex = <Java-Regex>
+```
+Example: `analysis.variability_change_analyzer.vm_files_regex = .*/Kconfig((\\.|\\-|\\_|\\+|\\~).*)?`
+```Properties
+Type: mandatory
+Default value: none
+Related parameters: none
+analysis.variability_change_analyzer.code_files_regex = <Java-Regex>
+```
+Example: `analysis.variability_change_analyzer.code_files_regex = .*/.*\\.[hcS]((\\.|\\-|\\_|\\+|\\~).*)?`
+```Properties
+Type: mandatory
+Default value: none
+Related parameters: none
+analysis.variability_change_analyzer.build_files_regex = <Java-Regex>
+```
+Example: `analysis.variability_change_analyzer.build_files_regex = .*/(Makefile|Kbuild)((\\.|\\-|\\_|\\+|\\~).*)?`
+
+
 ## License
 This project is licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.html).
 
