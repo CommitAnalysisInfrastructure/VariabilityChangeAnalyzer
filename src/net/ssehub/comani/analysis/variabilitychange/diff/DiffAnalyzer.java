@@ -15,8 +15,6 @@ package net.ssehub.comani.analysis.variabilitychange.diff;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import net.ssehub.comani.core.Logger;
-import net.ssehub.comani.core.Logger.MessageType;
 import net.ssehub.comani.data.ChangedArtifact;
 import net.ssehub.comani.data.Commit;
 
@@ -34,11 +32,6 @@ import net.ssehub.comani.data.Commit;
 public class DiffAnalyzer {
     
     /**
-     * The name (id) of this class for logging information.
-     */
-    private static final String ID = "DiffAnalyzer";
-    
-    /**
      * This array contains file extensions (without the ".") for identifying files
      * that should not be analyzed.<br><br>
      * 
@@ -48,24 +41,6 @@ public class DiffAnalyzer {
      * but the content is not.
      */
     private static final String[] FILE_EXTENSION_BLACKLIST = {"lb"};
-    
-//    /**
-//     * String identifying the start of a new diff.<br><br>
-//     * 
-//     * Each commit may include multiple diffs, each describing
-//     * all changes to an individual file.<br><br>
-//     * 
-//     * Value: {@value #DIFF_START_PATTERN};
-//     */
-//    private static final String DIFF_START_PATTERN = "diff --git";
-    
-    /**
-     * String identifying the start of the first description of the
-     * actual changes of a diff.<br><br>
-     * 
-     * Value: {@value #CHANGES_START_PATTERN};
-     */
-    private static final String CHANGES_START_PATTERN = "@@";
     
     /**
      * Regex identifying directories containing documentation.<br><br>
@@ -117,37 +92,12 @@ public class DiffAnalyzer {
     private static final String BUILD_FILE_PATTERN = ".*/(Makefile|Kbuild)((\\.|\\-|\\_|\\+|\\~).*)?";
     // Possible addition: |(.*/.*\\.(mak|make)))
     
-//    /**
-//     * The {@link File} containing the diff information of a specific commit.<br><br>
-//     * Typically, the name of the file represents the commit SHA, e.g "0004e99.txt", where
-//     * "0004e99" is the commit SHA.<br><br>
-//     * The expected content of the file is a list of diff information, e.g.:<br>
-//     * <i>diff --git a/include/libbb.h b/include/libbb.h<br>
-//     * index 6fb0438..4b69c85 100644<br>
-//     * --- a/include/libbb.h<br>
-//     * +++ b/include/libbb.h<br>
-//     * @@ -1575,0 +1576,10 @@ extern const char *applet_name;<br>
-//     * [...]<br>
-//     * diff --git [...]<br>
-//     * [...]</i>
-//     */
-//    private File commitFile = null;
-    
-//    /**
-//     * The date the commit was created.<br><br>
-//     * The content of each {@link #commitFile} starts with a line containing the date and
-//     * time the specific commit was created, e.g. <i>2011-06-10 06:01:30 +0200</i>. This
-//     * property only contains the date in the format <i>dd/mm/yyyy</i>. 
-//     */
-//    private String commitDate = null;
-    
-//    /**
-//     * The commit SHA retrieved from {@link #commitFile} defining the commit to which
-//     * the analyzed diffs belong to. 
-//     */
-//    private String commitNumber = null;
+    /**
+     * The {@link Commit} to analyze given via the constructor of this class.
+     * 
+     * @see #DiffAnalyzer(Commit)
+     */
     private Commit commit;
-    private Logger logger;
     
     /**
      * The number of model files changed by the commit.
@@ -204,35 +154,21 @@ public class DiffAnalyzer {
      */
     public DiffAnalyzer(Commit commit) {
         this.commit = commit;
-        this.logger = Logger.getInstance();
-//        this.commitFile = commitFile;
-        
-//        String[] commitFileNameParts = commitFile.getName().split("\\.");
-//        if (commitFileNameParts.length != 2 
-//                || (commitFileNameParts.length == 2 && !commitFileNameParts[1].equals("txt"))) {
-//            commitNumber = "";
-//            ComAnLogger.getInstance().log(CLASS_ID, "File will be ignored",
-//                    "Name of file does not match <CommitSHA>.txt: \"" + commitFile.getName() + "\"",
-//                    MessageType.WARNING);
-//        } else {
-//            commitNumber = commitFile.getName().split("\\.")[0];
-//        }
     }
     
     /**
-     * Analyze the diff information of the given commit.
+     * Analyze the artifacts changed by the given commit.
      * 
-     * @return <code>true</code> if the analysis of the given commit was successful, <code>false</code> otherwise,
-     * e.g. if given commit does not match expected name, extension, or does not include changes
+     * @return <code>true</code> if the analysis of the given commit (changed artifacts) was successful,
+     *         <code>false</code> otherwise
      */
     public boolean analyze() {
         boolean analyzedSuccessful = false;
         if (!commit.getId().isEmpty()) {
-//            List<String> diffList = createDiffList();
-            List<ChangedArtifact> diffList = commit.getChangedArtifacts();
+            List<ChangedArtifact> changedArtifactList = commit.getChangedArtifacts();
             FileDiff fileDiff = null;
-            for (ChangedArtifact diff : diffList) {
-                fileDiff = createFileDiff(diff);
+            for (ChangedArtifact changedArtifact : changedArtifactList) {
+                fileDiff = createFileDiff(changedArtifact);
                 if (fileDiff != null) {
                     switch(fileDiff.getFileType()) {
                     case MODEL:
@@ -280,82 +216,46 @@ public class DiffAnalyzer {
     }
     
     /**
-     * Create a new {@link FileDiff} based on the given <code>diff</code> information. The actual type
+     * Create a new {@link FileDiff} based on the given {@link ChangedArtifact}. The actual type
      * of the returned <code>FileDiff</code> depends on the type of file under change as provided by the
-     * <code>diff</code> information:<br>
+     * changed artifact information:<br>
      * <ul>
      * <li>{@link SourceFileDiff}</li>
      * <li>{@link BuidFileDiff}</li>
      * <li>{@link ModelFileDiff}</li>
      * </ul><br>
      * 
-     * @param diff the {@link ChangedArtifact} describing the changes of a specific file
+     * @param changedArtifact the {@link ChangedArtifact} describing the changes of a specific file
      * @return a {@link FileDiff} object holding detailed information about the diff, e.g. number of changed lines
      */
-    private FileDiff createFileDiff(ChangedArtifact diff) {
+    private FileDiff createFileDiff(ChangedArtifact changedArtifact) {
         FileDiff fileDiff = null;
-        List<String> changedArtifactLines = diff.getDiffHeader();
-        changedArtifactLines.addAll(diff.getContent());
-        String[] diffLines = changedArtifactLines.toArray(new String[0]);
-        if (diffLines.length > 0) {
-            /*
-             * First line contains the path to and the name of the changed file, e.g.:
-             * 
-             *      diff --git a/<path>/<filename> b/<path>/<filename>
-             * 
-             * Thus, use this line to:
-             *      a) check whether the path includes directories not of interest (documentation, scripts)
-             *      b) identify the type of the file (variability model, source code, build) 
-             */
-            String changedFileDescriptionLine = diffLines[0];
-            /*
-             * Each diff starts with some general information about the introduced changes, e.g.:
-             * 
-             *      diff --git a/include/libbb.h b/include/libbb.h
-             *      index 6fb0438..4b69c85 100644
-             *      --- a/include/libbb.h
-             *      +++ b/include/libbb.h
-             *      @@ -1575,0 +1576,10 @@ extern const char *applet_name;
-             *      +
-             *      +/* Some older linkers don't perform string merging, we used to have common strings
-             *      ...
-             * 
-             * After identifying the name (and type) of the changed file, only the lines describing the
-             * actual changes to that file are of interest. Thus, skip the other lines containing general
-             * information. In the example, start with the line "@@ ..." for detailed analysis.
-             */
-            int changesStartLine = getFirstChangeLine(diffLines);
-            if (changesStartLine > -1 && changesStartLine < diffLines.length) {
-                if (Pattern.matches(FILE_EXCLUDE_PATTERN, changedFileDescriptionLine)
-                        || isBlacklisted(changedFileDescriptionLine)) {
-                    // Either excluded or blacklisted file changed, thus use OtherFileDiff
-                    fileDiff = new OtherFileDiff(diffLines, changesStartLine);
-                } else if (Pattern.matches(SOURCE_FILE_PATTERN, changedFileDescriptionLine)) {
-                    // Diff affects source code file
-                    changedSourceFilesCounter++;
-                    fileDiff = new SourceFileDiff(diffLines, changesStartLine);
-                } else if (Pattern.matches(BUILD_FILE_PATTERN, changedFileDescriptionLine)) {
-                    // Diff affects build file
-                    changedBuildFilesCounter++;
-                    fileDiff = new BuildFileDiff(diffLines, changesStartLine);
-                } else if (Pattern.matches(MODEL_FILE_PATTERN, changedFileDescriptionLine)) {
-                    // Diff affects model file
-                    changedModelFilesCounter++;
-                    fileDiff = new ModelFileDiff(diffLines, changesStartLine);
-                } else {
-                    /*
-                     * As this method should only return null if no changes start line can be identified,
-                     * we need another way of excluding files not of interest. This is done by creating an
-                     * OtherFileDiff-object, which is actually doing nothing and does not influence further
-                     * analysis. 
-                     */
-                    fileDiff = new OtherFileDiff(diffLines, changesStartLine);
-                }
+        if (!changedArtifact.getArtifactPath().isEmpty()) {
+            String[] diffLines = changedArtifact.getContent().toArray(new String[0]);
+            if (Pattern.matches(FILE_EXCLUDE_PATTERN, changedArtifact.getArtifactPath())
+                    || isBlacklisted(changedArtifact.getArtifactPath())) {
+                // Either excluded or blacklisted file changed, thus use OtherFileDiff
+                fileDiff = new OtherFileDiff(diffLines, 0);
+            } else if (Pattern.matches(SOURCE_FILE_PATTERN, changedArtifact.getArtifactPath())) {
+                // Diff affects source code file
+                changedSourceFilesCounter++;
+                fileDiff = new SourceFileDiff(diffLines, 0);
+            } else if (Pattern.matches(BUILD_FILE_PATTERN, changedArtifact.getArtifactPath())) {
+                // Diff affects build file
+                changedBuildFilesCounter++;
+                fileDiff = new BuildFileDiff(diffLines, 0);
+            } else if (Pattern.matches(MODEL_FILE_PATTERN, changedArtifact.getArtifactPath())) {
+                // Diff affects model file
+                changedModelFilesCounter++;
+                fileDiff = new ModelFileDiff(diffLines, 0);
             } else {
-                logger.log(ID, "No changes found",
-                        "Commit \"" + commit.getId() 
-                        + "\" includes diff without any line starting with \"@@\" indicating line changes",
-                        MessageType.DEBUG);
+                /*
+                 * As this method should only return null if no changes start line can be identified,
+                 * we need another way of excluding files not of interest. This is done by creating an
+                 * OtherFileDiff-object, which is actually doing nothing and does not influence further
+                 * analysis. 
+                 */
+                fileDiff = new OtherFileDiff(diffLines, 0);
             }
         }
         return fileDiff;
@@ -387,93 +287,6 @@ public class DiffAnalyzer {
         }
         return isBlacklisted;
     }
-    
-    /**
-     * Return the index of the line in the diff information part that marks the starting
-     * point of the change details in terms of added and removed lines. This line starts with
-     * {@value #CHANGES_START_PATTERN}. 
-     *  
-     * @param diffLines the diff information part in which the line marking the start of
-     * change details should be found
-     * @return the index of the line in the diff information part marking the start of
-     * change details or <code>-1</code> if this line could not be found.
-     */
-    private int getFirstChangeLine(String[] diffLines) {
-        int firstChangeLine = -1;
-        int lineCounter = 0;
-        while (firstChangeLine < 0 && lineCounter < diffLines.length) {
-            if (diffLines[lineCounter].startsWith(CHANGES_START_PATTERN)) {
-                firstChangeLine = lineCounter;
-            }
-            lineCounter++;
-        }
-        return firstChangeLine;
-    }
-    
-//    /**
-//     * Create a list of diff information read from the defined commit file.
-//     * 
-//     * @return a {@link List} of strings, each containing a diff information (single file diff)
-//     * @see {@link #DiffAnalyzer(File)}
-//     */
-//    private List<String> createDiffList() {
-//        List<String> diffList = null;
-//        FileReader fileReader = null;
-//        BufferedReader bufferedReader = null;
-//        try {
-//            diffList = new ArrayList<String>();
-//            fileReader = new FileReader(commitFile);
-//            bufferedReader = new BufferedReader(fileReader);
-//            String fileLine;
-//            StringBuilder diffInfoBuilder = new StringBuilder();
-//            // First line always contains commit date and time; parse this individually
-//            parseCommitDate(bufferedReader.readLine());
-//            do {
-//                fileLine = bufferedReader.readLine();
-//                if (fileLine != null) {
-//                    if (fileLine.startsWith(DIFF_START_PATTERN)) {
-//                        if (diffInfoBuilder.length() > 0) {
-//                            // Save current diff info to list
-//                            diffList.add(diffInfoBuilder.toString());
-//                        }
-//                        diffInfoBuilder = new StringBuilder();
-//                        diffInfoBuilder.append(fileLine);
-//                    } else {
-//                        diffInfoBuilder.append("\n" + fileLine);
-//                    }
-//                } else {
-//                    // EOF push last diff info from builder to list
-//                    diffList.add(diffInfoBuilder.toString());
-//                    diffInfoBuilder = null;
-//                }
-//            } while (fileLine != null);
-//        } catch (IOException e) {
-//            diffList = null;
-//            ComAnLogger.getInstance().log(CLASS_ID, "Reading file \"" + commitFile.getName() + "\"failed",
-//                    e.getMessage(), MessageType.ERROR);
-//        } finally {
-//            // Close the readers in any case
-//            if (fileReader != null) {
-//                try {
-//                    fileReader.close();
-//                } catch (IOException e) {
-//                    diffList = null;
-//                    ComAnLogger.getInstance().log(CLASS_ID, "Closing file reader for \"" 
-//                            + commitFile.getAbsolutePath() + "\" failed", e.getMessage(), MessageType.ERROR);
-//                }
-//            }
-//            if (bufferedReader != null) {
-//                try {
-//                    bufferedReader.close();
-//                } catch (IOException e) {
-//                    diffList = null;
-//                    ComAnLogger.getInstance().log(CLASS_ID, "Closing buffered reader for \"" 
-//                            + commitFile.getAbsolutePath() + "\" failed", e.getMessage(), MessageType.ERROR);
-//                }
-//            }
-//        }
-//        return diffList;
-//    }
     
     /**
      * Parse the given content line to a reduced date format.
