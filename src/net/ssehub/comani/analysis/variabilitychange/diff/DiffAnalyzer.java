@@ -68,29 +68,19 @@ public class DiffAnalyzer {
                                                            + SCRIPT_DIR_PATTERN + "))/.*)|(.*\\.txt)";
     
     /**
-     * Regex identifying variability model files.<br><br>
-     * 
-     * Value: {@value #MODEL_FILE_PATTERN};<br><br>
-     * 
-     * Note: No support for busybox anymore due to constant changes in
-     * naming and using the variability model (files).
+     * Regex identifying variability model files.
      */
-    private static final String MODEL_FILE_PATTERN = ".*/Kconfig((\\.|\\-|\\_|\\+|\\~).*)?";
+    private String vmFilePattern;
     
     /**
-     * Regex identifying source code files.<br><br>
-     * 
-     * Value: {@value #SOURCE_FILE_PATTERN};
+     * Regex identifying code files.
      */
-    private static final String SOURCE_FILE_PATTERN = ".*/.*\\.[hcS]((\\.|\\-|\\_|\\+|\\~).*)?";
+    private String codeFilePattern;
     
     /**
-     * Regex identifying build files.<br><br>
-     * 
-     * Value: {@value #BUILD_FILE_PATTERN};
+     * Regex identifying build files.
      */
-    private static final String BUILD_FILE_PATTERN = ".*/(Makefile|Kbuild)((\\.|\\-|\\_|\\+|\\~).*)?";
-    // Possible addition: |(.*/.*\\.(mak|make)))
+    private String buildFilePattern;
     
     /**
      * The {@link Commit} to analyze given via the constructor of this class.
@@ -148,11 +138,17 @@ public class DiffAnalyzer {
     private int changedBuildVarLinesCounter = 0;
     
     /**
-     * Construct a new {@link DiffAnalyzer}.<br><br>
+     * Construct a new {@link DiffAnalyzer}.
      * 
-     * @param commit the {@link Commit} containing diff information.
+     * @param vmFilesRegex the regular expression identifying variability model files
+     * @param codeFilesRegex the regular expression identifying code files
+     * @param buildFilesRegex the regular expression identifying build files
+     * @param commit the {@link Commit} containing diff information
      */
-    public DiffAnalyzer(Commit commit) {
+    public DiffAnalyzer(String vmFilesRegex, String codeFilesRegex, String buildFilesRegex, Commit commit) {
+        this.vmFilePattern = vmFilesRegex;
+        this.codeFilePattern = codeFilesRegex;
+        this.buildFilePattern = buildFilesRegex;
         this.commit = commit;
     }
     
@@ -236,15 +232,15 @@ public class DiffAnalyzer {
                     || isBlacklisted(changedArtifact.getArtifactPath())) {
                 // Either excluded or blacklisted file changed, thus use OtherFileDiff
                 fileDiff = new OtherFileDiff(diffLines, 0);
-            } else if (Pattern.matches(SOURCE_FILE_PATTERN, changedArtifact.getArtifactPath())) {
+            } else if (Pattern.matches(codeFilePattern, changedArtifact.getArtifactPath())) {
                 // Diff affects source code file
                 changedSourceFilesCounter++;
                 fileDiff = new SourceFileDiff(diffLines, 0);
-            } else if (Pattern.matches(BUILD_FILE_PATTERN, changedArtifact.getArtifactPath())) {
+            } else if (Pattern.matches(buildFilePattern, changedArtifact.getArtifactPath())) {
                 // Diff affects build file
                 changedBuildFilesCounter++;
                 fileDiff = new BuildFileDiff(diffLines, 0);
-            } else if (Pattern.matches(MODEL_FILE_PATTERN, changedArtifact.getArtifactPath())) {
+            } else if (Pattern.matches(vmFilePattern, changedArtifact.getArtifactPath())) {
                 // Diff affects model file
                 changedModelFilesCounter++;
                 fileDiff = new ModelFileDiff(diffLines, 0);

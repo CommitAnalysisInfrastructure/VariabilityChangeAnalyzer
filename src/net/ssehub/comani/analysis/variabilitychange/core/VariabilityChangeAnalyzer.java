@@ -15,6 +15,8 @@ package net.ssehub.comani.analysis.variabilitychange.core;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import net.ssehub.comani.analysis.AbstractCommitAnalyzer;
 import net.ssehub.comani.analysis.AnalysisSetupException;
@@ -44,6 +46,24 @@ public class VariabilityChangeAnalyzer extends AbstractCommitAnalyzer {
      * will be stored. The definition of this property is mandatory and has to define an existing directory.
      */
     private static final String PROPERTY_ANALYSIS_OUTPUT = "analysis.output";
+    
+    /**
+     * The string representation of the properties' key identifying the regular expression for identifying variability
+     * model files. The definition of this property is mandatory and has to define a valid Java regular expression.
+     */
+    private static final String PROPERTY_VM_FILES_REGEX = "analysis.variability_change_analyzer.vm_files_regex";
+    
+    /**
+     * The string representation of the properties' key identifying the regular expression for identifying code files.
+     * The definition of this property is mandatory and has to define a valid Java regular expression.
+     */
+    private static final String PROPERTY_CODE_FILES_REGEX = "analysis.variability_change_analyzer.code_files_regex";
+    
+    /**
+     * The string representation of the properties' key identifying the regular expression for identifying build files.
+     * The definition of this property is mandatory and has to define a valid Java regular expression.
+     */
+    private static final String PROPERTY_BUILD_FILES_REGEX = "analysis.variability_change_analyzer.build_files_regex";
     
     /**
      * The string representation of the properties' key identifying the SPL from which the commits are analyzed. 
@@ -106,6 +126,24 @@ public class VariabilityChangeAnalyzer extends AbstractCommitAnalyzer {
     private File unanalyzedFile;
     
     /**
+     * The string denoting the Java regular expression for identifying variability model files. This value is set by
+     * {@link #prepare()} based on the value of {@link #PROPERTY_VM_FILES_REGEX}.
+     */
+    private String vmFilesRegex;
+    
+    /**
+     * The string denoting the Java regular expression for identifying code files. This value is set by
+     * {@link #prepare()} based on the value of {@link #PROPERTY_CODE_FILES_REGEX}.
+     */
+    private String codeFilesRegex;
+    
+    /**
+     * The string denoting the Java regular expression for identifying build files. This value is set by
+     * {@link #prepare()} based on the value of {@link #PROPERTY_VM_FILES_REGEX}.
+     */
+    private String buildFilesRegex;
+    
+    /**
      * The string denoting the name of the software product line for which the commits will be analyzed. Currently
      * supported values are "Linux" and "Coreboot". This value is set by {@link #prepare()} based on the value of
      * {@link #PROPERTY_TARGET_SPL}.
@@ -157,7 +195,7 @@ public class VariabilityChangeAnalyzer extends AbstractCommitAnalyzer {
             Commit commit = commitQueue.getCommit();
             if (commit != null) {
                 logger.log(ID, "Analyzing commit " + commit.getId(), null, MessageType.DEBUG);
-                diffAnalyzer = new DiffAnalyzer(commit);
+                diffAnalyzer = new DiffAnalyzer(vmFilesRegex, codeFilesRegex, buildFilesRegex, commit);
                 if (!diffAnalyzer.getCommitNumber().isEmpty() && diffAnalyzer.analyze()) {
                     logger.log(ID, "Writing analysis results for commit " + commit.getId(), null,
                         MessageType.DEBUG);
@@ -198,6 +236,12 @@ public class VariabilityChangeAnalyzer extends AbstractCommitAnalyzer {
                 throw new AnalysisSetupException("Unsupported target SPL specified");
             }
         }
+        vmFilesRegex = analysisProperties.getProperty(PROPERTY_VM_FILES_REGEX);
+        checkRegex(PROPERTY_VM_FILES_REGEX, vmFilesRegex);
+        codeFilesRegex = analysisProperties.getProperty(PROPERTY_CODE_FILES_REGEX);
+        checkRegex(PROPERTY_CODE_FILES_REGEX, codeFilesRegex);
+        buildFilesRegex = analysisProperties.getProperty(PROPERTY_BUILD_FILES_REGEX);
+        checkRegex(PROPERTY_BUILD_FILES_REGEX, buildFilesRegex);
         // Second: check and prepare required directories and files
         // Unavailability of analysis output property or defined directory handled by Setup
         resultsDirectory = new File(analysisProperties.getProperty(PROPERTY_ANALYSIS_OUTPUT));
@@ -217,6 +261,33 @@ public class VariabilityChangeAnalyzer extends AbstractCommitAnalyzer {
         } else {
             throw new AnalysisSetupException("Creating new result directory \"" + resultsDirectory.getAbsolutePath() 
                     + "\" failed");
+        }
+    }
+    
+    /**
+     * Checks if the given regular expression (regex) for the given file identification property (regexProperty) is not
+     * empty or undefined and a valid Java regular expression.
+     * 
+     * @param regexProperty one of {@link #PROPERTY_VM_FILES_REGEX}, {@link #PROPERTY_CODE_FILES_REGEX}, or
+     *        {@link #PROPERTY_BUILD_FILES_REGEX}
+     * @param regex the Java regular expression as defined by the user for one of the above properties
+     * @throws AnalysisSetupException if the given expression is empty, undefined, or is not a valid Java regular
+     *         expression
+     */
+    private void checkRegex(String regexProperty, String regex) throws AnalysisSetupException {
+        String exceptionMessage = null;
+        if (regex != null && !regex.isEmpty()) {
+            try {                
+                Pattern.compile(regex);
+            } catch (PatternSyntaxException e) {
+                exceptionMessage = "Regular expression for \"" + regexProperty + "\" is invalid: " + e.getDescription();
+            }
+        } else {
+            exceptionMessage = "Missing Java regular expression for identifying files; please define \"" 
+                    + regexProperty + "\" in the configuration file";
+        }
+        if (exceptionMessage != null) {
+            throw new AnalysisSetupException(exceptionMessage);
         }
     }
     
