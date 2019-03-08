@@ -56,7 +56,8 @@ public class BuildFileDiff extends FileDiff {
      * 
      * Value: {@value #BUILD_VAR_PATTERN};
      */
-    private static final String BUILD_VAR_PATTERN = ".*\\$\\(CONFIG_.*";
+//    private static final String BUILD_VAR_PATTERN = ".*\\$\\(CONFIG_.*";
+    private static final String BUILD_VAR_PATTERN = ".*(\\s+|\\(|\\[|\\{|\\<|\\)|\\]|\\}|\\>)\\!?CONFIG_.*";
     
     /**
      * Regex identifying lines that contain the start of a conditional block.<br><br>
