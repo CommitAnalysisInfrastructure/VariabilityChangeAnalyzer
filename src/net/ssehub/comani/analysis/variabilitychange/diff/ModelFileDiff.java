@@ -165,27 +165,29 @@ public class ModelFileDiff extends FileDiff {
      */
     private boolean isPartOfHelp(String diffLine, int diffLinePosition) {
         boolean isPartOfHelp = false;
-        boolean parentElementFound = false;
-        int diffLineIndentation = getIndentation(diffLine);
-        if (diffLineIndentation > 0) {
-            int diffLineCounter = diffLinePosition - 1;
-            String previousDiffLine = null;
-            do {
-                previousDiffLine = normalize(diffLines[diffLineCounter], diffLineCounter);
-                if (!previousDiffLine.isEmpty()) {
-                    int previousDiffLineIndentation = getIndentation(previousDiffLine);
-                    if (previousDiffLineIndentation < diffLineIndentation) {
-                        parentElementFound = true;
-                        previousDiffLine = previousDiffLine.trim();
-                        if (previousDiffLine.startsWith("help") 
-                                || previousDiffLine.startsWith("--help--")
-                                || previousDiffLine.startsWith("comment")) {
-                            isPartOfHelp = true;
-                        }
-                    }
-                }
-                diffLineCounter--;
-            } while (diffLineCounter >= 0 && !parentElementFound);
+        if (diffLinePosition > 0) {        	
+        	boolean parentElementFound = false;
+        	int diffLineIndentation = getIndentation(diffLine);
+        	if (diffLineIndentation > 0) {
+        		int diffLineCounter = diffLinePosition - 1;
+        		String previousDiffLine = null;
+        		do {
+        			previousDiffLine = normalize(diffLines[diffLineCounter], diffLineCounter);
+        			if (!previousDiffLine.isEmpty()) {
+        				int previousDiffLineIndentation = getIndentation(previousDiffLine);
+        				if (previousDiffLineIndentation < diffLineIndentation) {
+        					parentElementFound = true;
+        					previousDiffLine = previousDiffLine.trim();
+        					if (previousDiffLine.startsWith("help") 
+        							|| previousDiffLine.startsWith("--help--")
+        							|| previousDiffLine.startsWith("comment")) {
+        						isPartOfHelp = true;
+        					}
+        				}
+        			}
+        			diffLineCounter--;
+        		} while (diffLineCounter >= 0 && !parentElementFound);
+        	}
         }
         return isPartOfHelp;
     }
