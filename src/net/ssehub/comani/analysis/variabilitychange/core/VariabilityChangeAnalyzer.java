@@ -312,15 +312,17 @@ public class VariabilityChangeAnalyzer extends AbstractCommitAnalyzer {
 //                    String standardOutputData = executionResult.getStandardOutputData();
 //                    if (standardOutputData != null && !standardOutputData.isEmpty()) {                        
 //                        if (!standardOutputData.contains("Hmisc") || !standardOutputData.contains("nortest")) {
-//                            throw new AnalysisSetupException("Missing R packages\n"
+//                            throw new AnalysisSetupException("Missing R packages" + System.lineSeperator()
 //                                    + "Please install packages \"Hmisc\" and \"nortest\" as part of the R installation");
 //                        }
 //                    } else {
-//                        throw new AnalysisSetupException("Executing command \"R -q -e \"installed.packages()[,1]\"\" returned no output\n"
+//                        throw new AnalysisSetupException("Executing command \"R -q -e \"installed.packages()[,1]\"\" returned no output"
+//                                + System.lineSeperator()
 //                                + "Cannot determine installed R packages");
 //                    }
 //                } else {
-//                    throw new AnalysisSetupException("Executing command \"R -q -e \"installed.packages()[,1]\"\" failed\n"
+//                    throw new AnalysisSetupException("Executing command \"R -q -e \"installed.packages()[,1]\"\" failed"
+//                            + System.lineSeperator()
 //                            + "Cannot determine installed R packages");
 //                }
             } else {

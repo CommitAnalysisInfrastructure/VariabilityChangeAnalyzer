@@ -227,7 +227,8 @@ public class ResultCollector {
                 if (!resultHeaderWritten) {
                     resultLineBuilder.append("Date\tCommit\tCCF\tCCLAI\tCCLVI\t"
                             + "CBF\tCBLAI\tCBLVI\t"
-                            + "CMF\tCMLAI\tCMLVI\n");
+                            + "CMF\tCMLAI\tCMLVI");
+                    resultLineBuilder.append(System.lineSeparator());
                     resultHeaderWritten = true;
                 }
                 // The date of the analyzed commit
@@ -254,7 +255,8 @@ public class ResultCollector {
                  */
                 resultLineBuilder.append(newChangedModelFilesCount + "\t");
                 resultLineBuilder.append(newChangedModelLinesCount + "\t");
-                resultLineBuilder.append(newChangedModelVarLinesCount + "\n");
+                resultLineBuilder.append(newChangedModelVarLinesCount);
+                resultLineBuilder.append(System.lineSeparator());
                 // Append current results to result file
                 FileWriter resultFileWriter = new FileWriter(resultFile, true);
                 BufferedWriter bufferedResultWriter = new BufferedWriter(resultFileWriter);
@@ -277,7 +279,7 @@ public class ResultCollector {
         try {
             StringBuilder errorLineBuilder = new StringBuilder();
             errorLineBuilder.append(commitFileName);
-            errorLineBuilder.append("\n");
+            errorLineBuilder.append(System.lineSeparator());
             
             FileWriter errorFileWriter = new FileWriter(unanalyzedFile, true);
             BufferedWriter bufferedErrorWriter = new BufferedWriter(errorFileWriter);
@@ -305,40 +307,67 @@ public class ResultCollector {
         try {
             StringBuilder summaryLineBuilder = new StringBuilder();
             // Column titles
-            summaryLineBuilder.append("Counted Element\tNumber of Commits\tNumber of Changed Lines (artifact-specific)\tNumber of Changed Lines (variability)\n");
+            summaryLineBuilder.append("Counted Element\tNumber of Commits\tNumber of Changed Lines (artifact-specific)\tNumber of Changed Lines (variability)");
+            summaryLineBuilder.append(System.lineSeparator());
             // Commits available
-            summaryLineBuilder.append("CAv\t" + commitFilesNum + "\n");
+            summaryLineBuilder.append("CAv\t" + commitFilesNum);
+            summaryLineBuilder.append(System.lineSeparator());
             // Commits analyzed
-            summaryLineBuilder.append("CAn\t" + analyzedCommitsCounter + "\n");
+            summaryLineBuilder.append("CAn\t" + analyzedCommitsCounter);
+            summaryLineBuilder.append(System.lineSeparator());
             // Commits changing artifact-specific information only and corresponding sum of changed lines over all commits and file types
-            summaryLineBuilder.append("CCAI\t" + commitsChangingArtifactInfoCounter + "\t" + changedArtifactInfoLinesOnlyCounter + "\n");
+            summaryLineBuilder.append("CCAI\t" + commitsChangingArtifactInfoCounter + "\t" + changedArtifactInfoLinesOnlyCounter);
+            summaryLineBuilder.append(System.lineSeparator());
             // Commits changing variability information only and corresponding sum of changed lines over all commits and file types
-            summaryLineBuilder.append("CCVI\t" + commitsChangingVariabilityInfoCounter + "\t\t" + changedVariabilityInfoLinesOnlyCounter + "\n");
+            summaryLineBuilder.append("CCVI\t" + commitsChangingVariabilityInfoCounter + "\t\t" + changedVariabilityInfoLinesOnlyCounter);
+            summaryLineBuilder.append(System.lineSeparator());
             // Commits changing artifact-specific and variability information and corresponding sum of changed lines over all commits and file types
-            summaryLineBuilder.append("CCAVI\t" + commitsChangingArtifactAndVariabilityInfoCounter + "\t" + changedArtifactInfoLinesCounter + "\t" + changedVariabilityInfoLinesCounter + "\n");
+            summaryLineBuilder.append("CCAVI\t" + commitsChangingArtifactAndVariabilityInfoCounter + "\t" + changedArtifactInfoLinesCounter + "\t" + changedVariabilityInfoLinesCounter);
+            summaryLineBuilder.append(System.lineSeparator());
             // Changed model lines: artifact-specific, variability
-            summaryLineBuilder.append("CML\t\t" + changedModelLinesCounter + "\t" + changedModelVarLinesCounter + "\n");
+            summaryLineBuilder.append("CML\t\t" + changedModelLinesCounter + "\t" + changedModelVarLinesCounter);
+            summaryLineBuilder.append(System.lineSeparator());
             // Changed source code lines: artifact-specific, variability
-            summaryLineBuilder.append("CCL\t\t" + changedSourceLinesCounter + "\t" + changedSourceVarLinesCounter + "\n");
+            summaryLineBuilder.append("CCL\t\t" + changedSourceLinesCounter + "\t" + changedSourceVarLinesCounter);
+            summaryLineBuilder.append(System.lineSeparator());
             // Changed build lines: artifact-specific, variability
-            summaryLineBuilder.append("CBL\t\t" + changedBuildLinesCounter + "\t" + changedBuildVarLinesCounter  + "\n");
+            summaryLineBuilder.append("CBL\t\t" + changedBuildLinesCounter + "\t" + changedBuildVarLinesCounter);
+            summaryLineBuilder.append(System.lineSeparator());
             // Append description of abbreviations to summary file
-            summaryLineBuilder.append("\n\nDescription:\n");
-            summaryLineBuilder.append("CAv\t[C]ommits [Av]ailable: number of all commits input to this analysis\n");
-            summaryLineBuilder.append("CAn\t[C]ommits [An]alyzed: number of commits actually analyzed\n");
-            summaryLineBuilder.append("\t    Some commits may not be analyzed due to no file changes\n");
-            summaryLineBuilder.append("CCAI\t[C]ommits [C]hanging [A]rtifact-specific [I]nformation: number of commits that exclusively change at least one line of\n");
-            summaryLineBuilder.append("\t    a) help text in a variability model file (no variability information)\n");
-            summaryLineBuilder.append("\t    b) general source code in a source code file (no variability information)\n");
-            summaryLineBuilder.append("\t    c) the general build process definition in a build file (no variability information)\n");
-            summaryLineBuilder.append("CCVI\t[C]ommits [C]hanging [V]ariability [I]nformation: number of commits that exclusively change at least one line defining\n");
-            summaryLineBuilder.append("\t    a) configuration options, etc. in a variability model file (variability information)\n");
-            summaryLineBuilder.append("\t    b) references to configuration options in a source code file (variability information)\n");
-            summaryLineBuilder.append("\t    c) references to configuration options in a build file (variability information)\n");
-            summaryLineBuilder.append("CCAVI\t[C]ommits [C]hanging [A]rtifact-specific and [V]ariability [I]nformation: number of commits that change both types of information (see CCAI and CCVI)\n");
-            summaryLineBuilder.append("CML\t[C]hanged [M]odel [L]ines: number of changed model lines over all analyzed commits\n");
-            summaryLineBuilder.append("CCL\t[C]hanged source [C]ode [L]ines: number of changed source code lines over all analyzed commits\n");
-            summaryLineBuilder.append("CBL\t[C]hanged [B]uild process[L]ines: number of changed build process lines over all analyzed commits\n");
+            summaryLineBuilder.append(System.lineSeparator());
+            summaryLineBuilder.append(System.lineSeparator());
+            summaryLineBuilder.append("Description:");
+            summaryLineBuilder.append(System.lineSeparator());
+            summaryLineBuilder.append("CAv\t[C]ommits [Av]ailable: number of all commits input to this analysis");
+            summaryLineBuilder.append(System.lineSeparator());
+            summaryLineBuilder.append("CAn\t[C]ommits [An]alyzed: number of commits actually analyzed");
+            summaryLineBuilder.append(System.lineSeparator());
+            summaryLineBuilder.append("\t    Some commits may not be analyzed due to no file changes");
+            summaryLineBuilder.append(System.lineSeparator());
+            summaryLineBuilder.append("CCAI\t[C]ommits [C]hanging [A]rtifact-specific [I]nformation: number of commits that exclusively change at least one line of");
+            summaryLineBuilder.append(System.lineSeparator());
+            summaryLineBuilder.append("\t    a) help text in a variability model file (no variability information)");
+            summaryLineBuilder.append(System.lineSeparator());
+            summaryLineBuilder.append("\t    b) general source code in a source code file (no variability information)");
+            summaryLineBuilder.append(System.lineSeparator());
+            summaryLineBuilder.append("\t    c) the general build process definition in a build file (no variability information)");
+            summaryLineBuilder.append(System.lineSeparator());
+            summaryLineBuilder.append("CCVI\t[C]ommits [C]hanging [V]ariability [I]nformation: number of commits that exclusively change at least one line defining");
+            summaryLineBuilder.append(System.lineSeparator());
+            summaryLineBuilder.append("\t    a) configuration options, etc. in a variability model file (variability information)");
+            summaryLineBuilder.append(System.lineSeparator());
+            summaryLineBuilder.append("\t    b) references to configuration options in a source code file (variability information)");
+            summaryLineBuilder.append(System.lineSeparator());
+            summaryLineBuilder.append("\t    c) references to configuration options in a build file (variability information)");
+            summaryLineBuilder.append(System.lineSeparator());
+            summaryLineBuilder.append("CCAVI\t[C]ommits [C]hanging [A]rtifact-specific and [V]ariability [I]nformation: number of commits that change both types of information (see CCAI and CCVI)");
+            summaryLineBuilder.append(System.lineSeparator());
+            summaryLineBuilder.append("CML\t[C]hanged [M]odel [L]ines: number of changed model lines over all analyzed commits");
+            summaryLineBuilder.append(System.lineSeparator());
+            summaryLineBuilder.append("CCL\t[C]hanged source [C]ode [L]ines: number of changed source code lines over all analyzed commits");
+            summaryLineBuilder.append(System.lineSeparator());
+            summaryLineBuilder.append("CBL\t[C]hanged [B]uild process[L]ines: number of changed build process lines over all analyzed commits");
+            summaryLineBuilder.append(System.lineSeparator());
             // Write the complete summary file
             FileWriter summaryFileWriter = new FileWriter(summaryFile, true);
             BufferedWriter bufferedSummaryWriter = new BufferedWriter(summaryFileWriter);
