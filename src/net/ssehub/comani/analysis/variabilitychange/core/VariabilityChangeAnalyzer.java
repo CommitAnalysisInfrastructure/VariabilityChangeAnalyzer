@@ -297,10 +297,14 @@ public class VariabilityChangeAnalyzer extends AbstractCommitAnalyzer {
     private void checkRInstallation() throws AnalysisSetupException {
         ProcessUtilities processUtilities = ProcessUtilities.getInstance();
         ExecutionResult executionResult = processUtilities.executeCommand(R_VERSION_COMMAND, null);
-        // R is installed if the execution was successful and the error stream contains text starting with "R ..."
+        /*
+         * R is installed if the execution was successful and
+         *     - on Windows: the standard stream contains text "Rscript (R) [...]"
+         *     - on Ubuntu: the standard stream contains text "R [...]"
+         */
         if (executionResult.executionSuccessful()) {
-            String errorStreamText = executionResult.getErrorOutputData();
-            if (errorStreamText != null && !errorStreamText.isEmpty() && errorStreamText.startsWith("R ")) {
+        	if (startsWith(executionResult.getStandardOutputData(), "Rscript (R)")
+        			|| startsWith(executionResult.getErrorOutputData(), "R ")) {
                 // Check for installation of required R packages
                 /*
                  * TODO This check does not work on Linux as the process executing the command does not include the
@@ -331,6 +335,22 @@ public class VariabilityChangeAnalyzer extends AbstractCommitAnalyzer {
         } else {
             throw new AnalysisSetupException("Missing R-environment for visualizing results");
         }
+    }
+    
+    /**
+     * Checks whether the given test string starts with the given prefix. This method checks both strings for being not
+     * <code>null</code> and that the given test string is not empty before the actual check.
+     * 
+     * @param testString the string to check for starting with the given prefix
+     * @param prefix the prefix the given test string should start with
+     * @return <code>true</code>, if the given test string starts with the given prefix; <code>false</code> otherwise
+     */
+    private boolean startsWith(String testString, String prefix) {
+    	boolean startsWith = false;
+    	if (testString != null && !testString.isEmpty() && prefix != null) {
+    		startsWith = testString.startsWith(prefix);
+    	}
+    	return startsWith;
     }
     
     /**
